@@ -1,0 +1,203 @@
+#VRML_SIM R2025a utf8
+
+PROTO SimpleRosBot [
+  field SFVec3f translation 0 0.09 0
+  field SFRotation rotation 0 1 0 0
+  field SFString controller "rosbot_navigation"
+]
+{
+  Robot {
+    translation IS translation
+    rotation IS rotation
+    controller IS controller
+    name "RosBot"
+    children [
+      GPS {
+        name "gps"
+      }
+      Compass {
+        name "compass"
+      }
+      Camera {
+        name "camera"
+        translation 0 0.16 -0.18
+        width 320
+        height 240
+        fieldOfView 1.2
+      }
+      Lidar {
+        name "lidar"
+        translation 0 0.18 0
+        horizontalResolution 181
+        numberOfLayers 1
+        fieldOfView 3.14159
+        minRange 0.05
+        maxRange 8
+      }
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.08 0.18 0.85
+          roughness 0.6
+          metalness 0
+        }
+        geometry Box {
+          size 0.36 0.12 0.30
+        }
+      }
+      HingeJoint {
+        jointParameters HingeJointParameters {
+          axis 1 0 0
+          anchor -0.16 -0.02 -0.11
+        }
+        device [
+          RotationalMotor {
+            name "front left wheel motor"
+            maxVelocity 20
+            maxTorque 3
+          }
+        ]
+        endPoint Solid {
+          translation -0.16 -0.02 -0.11
+          rotation 0 0 1 1.5708
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.02 0.02 0.02
+                roughness 0.8
+              }
+              geometry Cylinder {
+                radius 0.055
+                height 0.045
+              }
+            }
+          ]
+          name "front left wheel"
+          boundingObject Cylinder {
+            radius 0.055
+            height 0.045
+          }
+          physics Physics {
+            mass 0.15
+          }
+        }
+      }
+      HingeJoint {
+        jointParameters HingeJointParameters {
+          axis 1 0 0
+          anchor 0.16 -0.02 -0.11
+        }
+        device [
+          RotationalMotor {
+            name "front right wheel motor"
+            maxVelocity 20
+            maxTorque 3
+          }
+        ]
+        endPoint Solid {
+          translation 0.16 -0.02 -0.11
+          rotation 0 0 1 1.5708
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.02 0.02 0.02
+                roughness 0.8
+              }
+              geometry Cylinder {
+                radius 0.055
+                height 0.045
+              }
+            }
+          ]
+          name "front right wheel"
+          boundingObject Cylinder {
+            radius 0.055
+            height 0.045
+          }
+          physics Physics {
+            mass 0.15
+          }
+        }
+      }
+      HingeJoint {
+        jointParameters HingeJointParameters {
+          axis 1 0 0
+          anchor -0.16 -0.02 0.11
+        }
+        device [
+          RotationalMotor {
+            name "rear left wheel motor"
+            maxVelocity 20
+            maxTorque 3
+          }
+        ]
+        endPoint Solid {
+          translation -0.16 -0.02 0.11
+          rotation 0 0 1 1.5708
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.02 0.02 0.02
+                roughness 0.8
+              }
+              geometry Cylinder {
+                radius 0.055
+                height 0.045
+              }
+            }
+          ]
+          name "rear left wheel"
+          boundingObject Cylinder {
+            radius 0.055
+            height 0.045
+          }
+          physics Physics {
+            mass 0.15
+          }
+        }
+      }
+      HingeJoint {
+        jointParameters HingeJointParameters {
+          axis 1 0 0
+          anchor 0.16 -0.02 0.11
+        }
+        device [
+          RotationalMotor {
+            name "rear right wheel motor"
+            maxVelocity 20
+            maxTorque 3
+          }
+        ]
+        endPoint Solid {
+          translation 0.16 -0.02 0.11
+          rotation 0 0 1 1.5708
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.02 0.02 0.02
+                roughness 0.8
+              }
+              geometry Cylinder {
+                radius 0.055
+                height 0.045
+              }
+            }
+          ]
+          name "rear right wheel"
+          boundingObject Cylinder {
+            radius 0.055
+            height 0.045
+          }
+          physics Physics {
+            mass 0.15
+          }
+        }
+      }
+    ]
+    boundingObject Box {
+      size 0.36 0.12 0.30
+    }
+    physics Physics {
+      mass 2.5
+    }
+  }
+}
