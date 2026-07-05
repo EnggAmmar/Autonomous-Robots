@@ -4,8 +4,13 @@ Tune this file first. Keep numbers here instead of hard-coding them in algorithm
 """
 
 # Start with DEVICE_SCAN. After you see motor/sensor names in the Webots console,
+<<<<<<< Updated upstream
 # change MODE to "MOTOR_TEST", then later to "RUN".
 MODE = "DEVICE_SCAN"  # options: "DEVICE_SCAN", "RUN", "MOTOR_TEST"
+=======
+# change MODE to "RUN".
+MODE = "MOTOR_TEST" # options: "DEVICE_SCAN", "RUN", "MOTOR_TEST"
+>>>>>>> Stashed changes
 
 TIME_STEP = 32  # ms
 
