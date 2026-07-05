@@ -5,11 +5,12 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/project
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
 
 WorldInfo {
+  basicTimeStep 32
   title "Autonomous Robots Training Environment 1"
 }
 Viewpoint {
-  orientation -0.4825459710313068 0.464201962393981 -0.7427421651899334 1.768431749307004
-  position -0.7181922711918944 34.59967937151007 1.4791225030310855
+  orientation 1 0 0 -1.5708
+  position 0 12 0
 }
 TexturedBackground {
 }
@@ -19,29 +20,18 @@ DirectionalLight {
   direction -0.4 -1 -0.4
   intensity 1.2
 }
+
+# Clean start pose. No hidden velocity/position fields are stored here.
+# The robot starts well inside the arena, away from all boundary walls.
 SimpleRosBot {
-  hidden position_0_0 -1.941621972748641
-  hidden position_0_1 -1.995152153973407
-  hidden position_0_2 -1.6856682522269044
-  hidden position_0_3 -0.9664826821560206
-  hidden linearVelocity_0 0.064525618976111 0.004859752772393238 0.02815316089152245
-  hidden angularVelocity_0 0.7364854997147346 0.7344178433299411 2.4231805194298457
-  hidden rotation_5 -0.6365393637316593 0.6365417018755929 0.4354679094875055 2.320188250681093
-  hidden linearVelocity_5 0.07287488590887214 0.31608854305734957 -0.08841437365955246
-  hidden angularVelocity_5 0.7364748905605694 0.7344301347618123 2.4231767984255157
-  hidden rotation_6 -0.6432620121718385 0.643264375009484 0.4152408066896793 2.354444113453389
-  hidden linearVelocity_6 0.0911118927370285 -0.45441111326852346 0.16676778754706242
-  hidden angularVelocity_6 0.7364832137683699 0.7344215162172656 2.423177548741347
-  hidden rotation_7 -0.5982184313208345 0.5982206287038649 0.5331667542347256 2.161940448120605
-  hidden linearVelocity_7 0.1388480941687172 0.45619133070568874 -0.13937101015886294
-  hidden angularVelocity_7 0.7364854109416834 0.7344176765283488 2.423180271661499
-  hidden rotation_8 -0.4213831347903516 0.4213846826198755 0.8030387306771718 1.788414075778097
-  hidden linearVelocity_8 0.15675512540485995 -0.31413169251717943 0.115945659098663
-  hidden angularVelocity_8 0.7364855038289218 0.7344177999050359 2.4231801972557894
-  translation -4.693418163505105 0.0027826143291589866 -4.95607996820452
-  rotation -0.025790428669595397 0.9825598433206317 -0.1841494178181793 -3.1158816228809987
+  translation -3.2 0.13 3.2
+  rotation 0 1 0 3.14159
+  controller "rosbot_navigation"
 }
+
+# Grey floor
 Solid {
+  name "floor"
   translation 0 -0.025 0
   children [
     Shape {
@@ -54,171 +44,115 @@ Solid {
       }
     }
   ]
-  name "floor"
   boundingObject Box {
     size 10 0.05 10
   }
 }
+
+# Outer boundary walls
 Solid {
+  name "north wall"
   translation 0 0.4 -5
   children [
     Shape {
-      appearance PBRAppearance {
-        baseColor 0.75 0.75 0.75
-        roughness 0.8
-      }
-      geometry Box {
-        size 10.2 0.8 0.18
-      }
+      appearance PBRAppearance { baseColor 0.75 0.75 0.75 roughness 0.8 }
+      geometry Box { size 10.2 0.8 0.18 }
     }
   ]
-  name "north wall"
-  boundingObject Box {
-    size 10.2 0.8 0.18
-  }
+  boundingObject Box { size 10.2 0.8 0.18 }
 }
 Solid {
+  name "south wall"
   translation 0 0.4 5
   children [
     Shape {
-      appearance PBRAppearance {
-        baseColor 0.75 0.75 0.75
-        roughness 0.8
-      }
-      geometry Box {
-        size 10.2 0.8 0.18
-      }
+      appearance PBRAppearance { baseColor 0.75 0.75 0.75 roughness 0.8 }
+      geometry Box { size 10.2 0.8 0.18 }
     }
   ]
-  name "south wall"
-  boundingObject Box {
-    size 10.2 0.8 0.18
-  }
+  boundingObject Box { size 10.2 0.8 0.18 }
 }
 Solid {
+  name "west wall"
   translation -5 0.4 0
   children [
     Shape {
-      appearance PBRAppearance {
-        baseColor 0.75 0.75 0.75
-        roughness 0.8
-      }
-      geometry Box {
-        size 0.18 0.8 10.2
-      }
+      appearance PBRAppearance { baseColor 0.75 0.75 0.75 roughness 0.8 }
+      geometry Box { size 0.18 0.8 10.2 }
     }
   ]
-  name "west wall"
-  boundingObject Box {
-    size 0.18 0.8 10.2
-  }
+  boundingObject Box { size 0.18 0.8 10.2 }
 }
 Solid {
+  name "east wall"
   translation 5 0.4 0
   children [
     Shape {
-      appearance PBRAppearance {
-        baseColor 0.75 0.75 0.75
-        roughness 0.8
-      }
-      geometry Box {
-        size 0.18 0.8 10.2
-      }
+      appearance PBRAppearance { baseColor 0.75 0.75 0.75 roughness 0.8 }
+      geometry Box { size 0.18 0.8 10.2 }
     }
   ]
-  name "east wall"
-  boundingObject Box {
-    size 0.18 0.8 10.2
-  }
+  boundingObject Box { size 0.18 0.8 10.2 }
 }
+
+# Internal obstacles / narrow passage
 Solid {
+  name "central vertical wall"
   translation -0.8 0.35 0.6
   children [
     Shape {
-      appearance PBRAppearance {
-        baseColor 0.45 0.45 0.45
-        roughness 0.8
-      }
-      geometry Box {
-        size 0.18 0.7 5
-      }
+      appearance PBRAppearance { baseColor 0.45 0.45 0.45 roughness 0.8 }
+      geometry Box { size 0.18 0.7 5.0 }
     }
   ]
-  name "central vertical wall"
-  boundingObject Box {
-    size 0.18 0.7 5
-  }
+  boundingObject Box { size 0.18 0.7 5.0 }
 }
 Solid {
+  name "central horizontal wall"
   translation 1.3 0.35 1.8
   children [
     Shape {
-      appearance PBRAppearance {
-        baseColor 0.45 0.45 0.45
-        roughness 0.8
-      }
-      geometry Box {
-        size 3.4 0.7 0.18
-      }
+      appearance PBRAppearance { baseColor 0.45 0.45 0.45 roughness 0.8 }
+      geometry Box { size 3.4 0.7 0.18 }
     }
   ]
-  name "central horizontal wall"
-  boundingObject Box {
-    size 3.4 0.7 0.18
-  }
+  boundingObject Box { size 3.4 0.7 0.18 }
 }
+
+# Forbidden green ground patch: visual only, controller must avoid it by camera/map logic.
 Solid {
+  name "green forbidden ground"
   translation 1.7 0.006 -1.4
   children [
     Shape {
-      appearance PBRAppearance {
-        baseColor 0 0.75 0.1
-        roughness 1
-      }
-      geometry Box {
-        size 1.8 0.01 1.3
-      }
+      appearance PBRAppearance { baseColor 0.0 0.75 0.1 roughness 1 }
+      geometry Box { size 1.8 0.01 1.3 }
     }
   ]
-  name "green forbidden ground"
 }
+
+# Blue target first
 Solid {
+  name "blue pillar"
   translation -3.2 0.4 -1.8
   children [
     Shape {
-      appearance PBRAppearance {
-        baseColor 0 0.05 1
-        roughness 0.5
-      }
-      geometry Cylinder {
-        height 0.8
-        radius 0.18
-      }
+      appearance PBRAppearance { baseColor 0.0 0.05 1.0 roughness 0.5 }
+      geometry Cylinder { radius 0.18 height 0.8 }
     }
   ]
-  name "blue pillar"
-  boundingObject Cylinder {
-    height 0.8
-    radius 0.18
-  }
+  boundingObject Cylinder { radius 0.18 height 0.8 }
 }
+
+# Yellow target second
 Solid {
-  translation 3.5 0.4 -3
+  name "yellow pillar"
+  translation 3.5 0.4 -3.0
   children [
     Shape {
-      appearance PBRAppearance {
-        baseColor 1 0.85 0
-        roughness 0.5
-      }
-      geometry Cylinder {
-        height 0.8
-        radius 0.18
-      }
+      appearance PBRAppearance { baseColor 1.0 0.85 0.0 roughness 0.5 }
+      geometry Cylinder { radius 0.18 height 0.8 }
     }
   ]
-  name "yellow pillar"
-  boundingObject Cylinder {
-    height 0.8
-    radius 0.18
-  }
+  boundingObject Cylinder { radius 0.18 height 0.8 }
 }
