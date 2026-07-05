@@ -4,15 +4,16 @@ Tune this file first. Keep numbers here instead of hard-coding them in algorithm
 """
 
 # Start with DEVICE_SCAN. After you see motor/sensor names in the Webots console,
-# change MODE to "RUN".
+# change MODE to "MOTOR_TEST", then later to "RUN".
 MODE = "DEVICE_SCAN"  # options: "DEVICE_SCAN", "RUN", "MOTOR_TEST"
 
 TIME_STEP = 32  # ms
 
-# Robot geometry. Tune after checking your RosBot dimensions.
-WHEEL_RADIUS_M = 0.043
-TRACK_WIDTH_M = 0.19
-ROBOT_RADIUS_M = 0.18
+# Robot geometry for the SimpleRosBot training PROTO.
+# When you switch to the official course RosBot, re-tune these values.
+WHEEL_RADIUS_M = 0.055
+TRACK_WIDTH_M = 0.32
+ROBOT_RADIUS_M = 0.23
 SAFETY_MARGIN_M = 0.08
 
 # Speed limits. Start slow, then increase.
