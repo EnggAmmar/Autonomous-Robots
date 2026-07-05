@@ -1,8 +1,8 @@
 """Main Webots controller for the Autonomous Robots Modularbeit.
 
 Development modes:
-1. DEVICE_SCAN: prints available device names.
-2. MOTOR_TEST: slowly drives forward so you can verify motor names.
+1. DEVICE_SCAN: prints available device names and does not move.
+2. MOTOR_TEST: waits three seconds, then slowly drives forward, turns, and stops.
 3. RUN: runs the starter navigation state machine.
 
 Important: This is starter code. You must test, tune, and understand it before
@@ -50,19 +50,25 @@ def main():
     print("========================================")
     iface.print_devices()
 
+    # DEVICE_SCAN is intentionally passive. It lets you open Webots, inspect the
+    # world and device names, and verify that nothing moves automatically.
     if config.MODE == "DEVICE_SCAN":
         while robot.step(config.TIME_STEP) != -1:
-            pass
+            iface.stop()
         return
 
+    # MOTOR_TEST is intentionally very slow and delayed. This prevents the robot
+    # from shooting into a wall while you are still adjusting the camera view.
     if config.MODE == "MOTOR_TEST":
-        step = 0
+        print("MOTOR_TEST: robot will wait 3 seconds, move slowly, turn slowly, then stop.")
         while robot.step(config.TIME_STEP) != -1:
-            step += 1
-            if step < 100:
-                iface.set_velocity(0.12, 0.0)
-            elif step < 180:
-                iface.set_velocity(0.0, 0.6)
+            t = robot.getTime()
+            if t < 3.0:
+                iface.stop()
+            elif t < 6.0:
+                iface.set_velocity(0.045, 0.0)
+            elif t < 8.0:
+                iface.set_velocity(0.0, 0.22)
             else:
                 iface.stop()
         return
@@ -90,12 +96,10 @@ def main():
         robot_x, robot_z, robot_heading = pose
         robot_cell = world_to_grid(robot_x, robot_z)
 
-        # Mapping update.
         grid_map.mark_robot_area_free(robot_x, robot_z)
         lidar_ranges = iface.get_lidar_ranges()
         grid_map.raycast_update(robot_x, robot_z, robot_heading, lidar_ranges, iface.get_lidar_fov())
 
-        # Vision update.
         bgr = webots_camera_to_bgr(iface.camera)
         blue = yellow = green = None
         if bgr is not None:
@@ -115,7 +119,6 @@ def main():
                 f"green={green.visible if green else None}",
             )
 
-        # State transitions based on color target.
         if state == SEARCH_BLUE and blue is not None and blue.visible:
             logger.info(sim_time, "Blue detected. Switching to visual approach.")
             state = GO_TO_BLUE
@@ -149,31 +152,27 @@ def main():
             iface.stop()
             continue
 
-        # Visual servoing when pillar is visible.
         if state == GO_TO_BLUE and blue is not None and blue.visible:
             omega = -blue.horizontal_error * config.MAX_ANGULAR_SPEED
-            v = 0.12 if abs(blue.horizontal_error) < 0.35 else 0.02
+            v = 0.08 if abs(blue.horizontal_error) < 0.35 else 0.01
             iface.set_velocity(v, omega)
             continue
 
         if state == GO_TO_YELLOW and yellow is not None and yellow.visible:
             omega = -yellow.horizontal_error * config.MAX_ANGULAR_SPEED
-            v = 0.12 if abs(yellow.horizontal_error) < 0.35 else 0.02
+            v = 0.08 if abs(yellow.horizontal_error) < 0.35 else 0.01
             iface.set_velocity(v, omega)
             continue
 
-        # Exploration with frontier + A* + DWA.
         need_replan = path_cells is None or (sim_time - last_plan_time) > config.REPLAN_INTERVAL_S
         if need_replan:
             frontier_goal = choose_frontier(grid_map.grid, robot_cell)
             if frontier_goal is None:
-                # If no frontier found, rotate to search with the camera.
-                iface.set_velocity(0.0, 0.5)
+                iface.set_velocity(0.0, 0.25)
                 continue
 
             path_cells = astar(inflated, robot_cell, frontier_goal, allow_unknown=False)
             if path_cells is None:
-                # Fallback: allow unknown during early development. Safer version should avoid unknown.
                 path_cells = astar(inflated, robot_cell, frontier_goal, allow_unknown=True)
 
             if path_cells is not None:
@@ -184,12 +183,12 @@ def main():
                 logger.info(sim_time, f"Planned path to frontier. cells={len(path_cells)}")
             else:
                 logger.info(sim_time, "No A* path found. Rotating.")
-                iface.set_velocity(0.0, 0.5)
+                iface.set_velocity(0.0, 0.25)
                 continue
 
         local_goal, waypoint_index = get_next_waypoint(pose, path_world, waypoint_index)
         if local_goal is None:
-            iface.set_velocity(0.0, 0.4)
+            iface.set_velocity(0.0, 0.25)
             continue
 
         v, omega = plan_dwa(pose, local_goal, grid_map, local_path=path_world[waypoint_index:])
