@@ -8,9 +8,11 @@ WorldInfo {
   basicTimeStep 32
   title "Safe Start Motor Test World"
 }
+
+# Good default frame: angled top view of full arena, robot, pillars and walls.
 Viewpoint {
-  orientation 1 0 0 -1.5708
-  position 0 10 0
+  orientation -0.577350269 0.577350269 0.577350269 2.0944
+  position 6 7 8
 }
 TexturedBackground {
 }
@@ -21,10 +23,9 @@ DirectionalLight {
   intensity 1.2
 }
 
-# This world is intentionally simple. The robot starts at the center of a large arena,
-# far away from every wall, so MOTOR_TEST can be checked without boundary collision.
+# The robot starts at the center, far away from every wall.
 SimpleRosBot {
-  translation 0 0.13 0
+  translation 0 0.14 0
   rotation 0 1 0 0
   controller "rosbot_navigation"
 }
@@ -41,11 +42,11 @@ Solid {
   boundingObject Box { size 14 0.05 14 }
 }
 
-# Far boundary walls, outside the motor-test start region.
-Solid { name "north wall" translation 0 0.4 -7 children [ Shape { appearance PBRAppearance { baseColor 0.75 0.75 0.75 roughness 0.8 } geometry Box { size 14.2 0.8 0.18 } } ] boundingObject Box { size 14.2 0.8 0.18 } }
-Solid { name "south wall" translation 0 0.4 7 children [ Shape { appearance PBRAppearance { baseColor 0.75 0.75 0.75 roughness 0.8 } geometry Box { size 14.2 0.8 0.18 } } ] boundingObject Box { size 14.2 0.8 0.18 } }
-Solid { name "west wall" translation -7 0.4 0 children [ Shape { appearance PBRAppearance { baseColor 0.75 0.75 0.75 roughness 0.8 } geometry Box { size 0.18 0.8 14.2 } } ] boundingObject Box { size 0.18 0.8 14.2 } }
-Solid { name "east wall" translation 7 0.4 0 children [ Shape { appearance PBRAppearance { baseColor 0.75 0.75 0.75 roughness 0.8 } geometry Box { size 0.18 0.8 14.2 } } ] boundingObject Box { size 0.18 0.8 14.2 } }
+# Thick fixed walls. They are static Solids with boundingObjects and no Physics node.
+Solid { name "north wall" translation 0 0.5 -7 children [ Shape { appearance PBRAppearance { baseColor 0.75 0.75 0.75 roughness 0.8 } geometry Box { size 14.4 1.0 0.45 } } ] boundingObject Box { size 14.4 1.0 0.45 } }
+Solid { name "south wall" translation 0 0.5 7 children [ Shape { appearance PBRAppearance { baseColor 0.75 0.75 0.75 roughness 0.8 } geometry Box { size 14.4 1.0 0.45 } } ] boundingObject Box { size 14.4 1.0 0.45 } }
+Solid { name "west wall" translation -7 0.5 0 children [ Shape { appearance PBRAppearance { baseColor 0.75 0.75 0.75 roughness 0.8 } geometry Box { size 0.45 1.0 14.4 } } ] boundingObject Box { size 0.45 1.0 14.4 } }
+Solid { name "east wall" translation 7 0.5 0 children [ Shape { appearance PBRAppearance { baseColor 0.75 0.75 0.75 roughness 0.8 } geometry Box { size 0.45 1.0 14.4 } } ] boundingObject Box { size 0.45 1.0 14.4 } }
 
 Solid {
   name "blue pillar"
