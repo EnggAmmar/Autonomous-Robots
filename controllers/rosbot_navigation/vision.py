@@ -40,10 +40,17 @@ def webots_camera_to_bgr(camera) -> Optional[np.ndarray]:
     return bgr
 
 
-def detect_hsv_blob(bgr: np.ndarray, low: Tuple[int, int, int], high: Tuple[int, int, int]) -> ColorDetection:
+def detect_hsv_blob(
+    bgr: np.ndarray,
+    low: Tuple[int, int, int],
+    high: Tuple[int, int, int],
+    ignore_top_frac: float = 0.0,
+) -> ColorDetection:
     h, w = bgr.shape[:2]
     hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, np.array(low, dtype=np.uint8), np.array(high, dtype=np.uint8))
+    if ignore_top_frac > 0.0:
+        mask[: int(h * ignore_top_frac), :] = 0
     mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, np.ones((5, 5), np.uint8))
     mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((7, 7), np.uint8))
 
@@ -66,11 +73,11 @@ def detect_hsv_blob(bgr: np.ndarray, low: Tuple[int, int, int], high: Tuple[int,
 
 
 def detect_blue(bgr: np.ndarray) -> ColorDetection:
-    return detect_hsv_blob(bgr, config.BLUE_HSV_LOW, config.BLUE_HSV_HIGH)
+    return detect_hsv_blob(bgr, config.BLUE_HSV_LOW, config.BLUE_HSV_HIGH, config.TARGET_IGNORE_TOP_FRAC)
 
 
 def detect_yellow(bgr: np.ndarray) -> ColorDetection:
-    return detect_hsv_blob(bgr, config.YELLOW_HSV_LOW, config.YELLOW_HSV_HIGH)
+    return detect_hsv_blob(bgr, config.YELLOW_HSV_LOW, config.YELLOW_HSV_HIGH, config.TARGET_IGNORE_TOP_FRAC)
 
 
 def detect_green(bgr: np.ndarray) -> ColorDetection:
