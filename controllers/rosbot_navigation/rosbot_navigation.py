@@ -45,12 +45,7 @@ def visual_servo_omega(horizontal_error: float) -> float:
 
 
 def visual_approach_speed(horizontal_error: float) -> float:
-    """Drive toward a visible pillar while still allowing hard turns.
-
-    The old value was 0.01 m/s when the target was near the image edge, which
-    looked like the robot was frozen while doing a 360-degree scan. This keeps a
-    small but real forward speed even while aligning.
-    """
+    """Drive toward a visible pillar while still allowing hard turns."""
     if abs(horizontal_error) < config.VISUAL_APPROACH_ALIGN_ERROR:
         return config.VISUAL_APPROACH_FAST_MPS
     return config.VISUAL_APPROACH_SLOW_MPS
@@ -252,6 +247,24 @@ def main():
 
         if state == DONE:
             iface.stop()
+            continue
+
+        # Before the blue pillar is reached, do not let frontier/DWA wander around.
+        # The first objective is simply to acquire/reacquire blue and then drive to it.
+        # This removes the observed behaviour where the robot initially moves in the
+        # right direction, then starts driving backwards because exploration selects
+        # a waypoint behind the robot.
+        if state == SEARCH_BLUE:
+            iface.set_velocity(0.0, config.SEARCH_ROTATION_SPEED)
+            continue
+
+        if state == GO_TO_BLUE and (blue is None or not blue.visible):
+            logger.info(sim_time, "Blue lost. Re-scanning instead of backing away.")
+            state = SEARCH_BLUE
+            path_cells = None
+            path_world = []
+            waypoint_index = 0
+            iface.set_velocity(0.0, config.SEARCH_ROTATION_SPEED)
             continue
 
         if state == GO_TO_BLUE and blue is not None and blue.visible:
