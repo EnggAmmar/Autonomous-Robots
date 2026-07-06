@@ -5,6 +5,7 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/project
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
 
 WorldInfo {
+  coordinateSystem "NUE"
   basicTimeStep 32
   title "Autonomous Robots Training Environment 1"
 }

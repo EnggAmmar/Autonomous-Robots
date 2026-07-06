@@ -7,3 +7,4 @@ centralWidgetVisible: 1
 orthographicViewHeight: 1
 textFiles: 0 "C:/Program Files/Webots/projects/robots/boston_dynamics/spot/controllers/spot_moving_demo/spot_moving_demo.c"
 consoles: Console:All:All
+renderingDevicePerspectives: RosBot:camera;1;1;0;0

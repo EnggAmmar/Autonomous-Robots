@@ -164,7 +164,10 @@ class RobotInterface:
         heading = 0.0
         if self.compass is not None:
             c = self.compass.getValues()
-            # This convention may need flipping depending on your robot model.
+            # Verified against a headless MOTOR_TEST run (forward creep at
+            # heading=-pi/2 produced dx=0, dz<0, matching dx=v*cos(h), dz=v*sin(h)
+            # exactly): atan2(c[0], c[2]) is the correct convention for this robot,
+            # matching coordinates.angle_to_target() / dwa.simulate_trajectory().
             heading = math.atan2(float(c[0]), float(c[2]))
             heading = normalize_angle(heading)
         return x, z, heading

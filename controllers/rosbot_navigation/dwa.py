@@ -28,13 +28,13 @@ def simulate_trajectory(pose: Pose, v: float, omega: float) -> List[Pose]:
 
 
 def trajectory_clearance(traj: List[Pose], occupancy_grid) -> float:
-    min_clearance = 1.0
+    min_clearance = float("inf")
     for x, z, _ in traj:
         if not occupancy_grid.is_safe_world(x, z):
             return -1.0
-        # Starter approximation. Later you can compute real distance transform.
-        min_clearance = min(min_clearance, 0.5)
-    return min_clearance
+        min_clearance = min(min_clearance, occupancy_grid.clearance_world(x, z))
+    # Cap so one very-open trajectory doesn't dominate the score over goal/heading terms.
+    return min(min_clearance, 1.0)
 
 
 def path_distance_score(traj_end: Pose, local_path: Optional[List[Waypoint]]) -> float:

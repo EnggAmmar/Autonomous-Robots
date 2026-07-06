@@ -64,6 +64,12 @@ def astar(grid, start: GridCell, goal: GridCell, allow_unknown: bool = False) ->
 
         for dr, dc, step_cost in _NEIGHBORS_8:
             neighbor = (current[0] + dr, current[1] + dc)
+            if dr != 0 and dc != 0:
+                # A robot with real width cannot cut through a corner where
+                # both flanking orthogonal cells are blocked.
+                if is_blocked(grid, (current[0] + dr, current[1]), allow_unknown=allow_unknown) and \
+                        is_blocked(grid, (current[0], current[1] + dc), allow_unknown=allow_unknown):
+                    continue
             if is_blocked(grid, neighbor, allow_unknown=allow_unknown):
                 continue
 
