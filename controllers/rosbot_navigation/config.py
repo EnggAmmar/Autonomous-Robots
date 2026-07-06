@@ -1,53 +1,49 @@
 """Configuration values for the Webots RosBot navigation project.
 
-Tune this file first. Keep numbers here instead of hard-coding them in algorithms.
+Current test target: reach the BLUE pillar as fast as possible and stop.
+Keep numbers here instead of hard-coding them in algorithms.
 """
 
-# Start with DEVICE_SCAN. After you see motor/sensor names in the Webots console,
-# change MODE to "MOTOR_TEST", then later to "RUN". Use "CAMERA_CALIBRATION" any
-# time to print HSV stats of the current camera frame for tuning the thresholds
-# below against the real pillars/floor.
-MODE = "RUN"  # options: "DEVICE_SCAN", "RUN", "MOTOR_TEST", "CAMERA_CALIBRATION"
+# Modes: "DEVICE_SCAN", "RUN", "MOTOR_TEST", "CAMERA_CALIBRATION"
+MODE = "RUN"
+
+# Target mode: "BLUE_ONLY" stops immediately after reaching the blue pillar.
+# Use this while your current target is only blue. Later, change to "BLUE_THEN_YELLOW".
+TARGET_MODE = "BLUE_ONLY"
 
 TIME_STEP = 32  # ms
 
 # Robot geometry for the SimpleRosBot training PROTO.
-# When you switch to the official course RosBot, re-tune these values.
 WHEEL_RADIUS_M = 0.055
 TRACK_WIDTH_M = 0.32
 ROBOT_RADIUS_M = 0.23
 SAFETY_MARGIN_M = 0.06
 
-# Motor polarity. Your MOTOR_TEST showed that +1.0 is the correct forward sign
-# for this training world. Keep this positive unless MOTOR_TEST starts moving
-# backward after a PROTO/world change.
+# Your MOTOR_TEST showed that +1.0 is the correct forward sign in this world.
 MOTOR_FORWARD_SIGN = 1.0
 MOTOR_TURN_SIGN = 1.0
 
-# Speed limits. These are still conservative, but high enough that the robot does
-# not spend the whole run rotating in place.
-MAX_LINEAR_SPEED = 0.55       # m/s
-MAX_ANGULAR_SPEED = 1.80      # rad/s
-MAX_WHEEL_SPEED = 16.0        # rad/s, used as safety clamp
+# Speed limits. Do not use values like 5 or 10 here; these are m/s and rad/s.
+MAX_LINEAR_SPEED = 0.70       # m/s
+MAX_ANGULAR_SPEED = 2.00      # rad/s
+MAX_WHEEL_SPEED = 18.0        # rad/s, safety clamp
 
-# Search/visual approach speeds.
-SEARCH_ROTATION_SPEED = 0.55
-NO_PATH_ROTATION_SPEED = 0.55
-VISUAL_APPROACH_FAST_MPS = 0.32
-VISUAL_APPROACH_SLOW_MPS = 0.12
-VISUAL_APPROACH_ALIGN_ERROR = 0.50
+# Blue-only behaviour.
+SEARCH_ROTATION_SPEED = 0.65
+NO_PATH_ROTATION_SPEED = 0.65
+VISUAL_APPROACH_FAST_MPS = 0.45
+VISUAL_APPROACH_SLOW_MPS = 0.16
+VISUAL_APPROACH_ALIGN_ERROR = 0.55
 
-# GO_TO_BLUE/GO_TO_YELLOW visual-servo proportional controller (rosbot_navigation.py).
-# MAX_ANGULAR_SPEED above stays a hard clamp; this is the working gain applied to
-# horizontal_error before that clamp. Use CAMERA_CALIBRATION if detection is wrong.
-VISUAL_SERVO_ANGULAR_GAIN = 0.65
-VISUAL_SERVO_DEADBAND = 0.04
+# Visual servo. Lower gain = less overshoot, higher gain = faster centering.
+VISUAL_SERVO_ANGULAR_GAIN = 0.55
+VISUAL_SERVO_DEADBAND = 0.035
 
-# Lidar self-detection zone (mapping.py's raycast_update).
-LIDAR_SELF_OCCLUSION_ANGLE_MIN_RAD = 0.1047  # ~6 degrees off dead-ahead
-LIDAR_SELF_OCCLUSION_ANGLE_MAX_RAD = 1.658   # ~95 degrees off dead-ahead
+# Lidar self-detection zone; kept for later mapping modes.
+LIDAR_SELF_OCCLUSION_ANGLE_MIN_RAD = 0.1047
+LIDAR_SELF_OCCLUSION_ANGLE_MAX_RAD = 1.658
 
-# Map settings. Webots navigation plane is usually X-Z. Grid cells are in meters.
+# Map settings. Kept for later mapping modes.
 GRID_RESOLUTION_M = 0.05
 MAP_WIDTH_M = 20.0
 MAP_HEIGHT_M = 20.0
@@ -58,10 +54,9 @@ UNKNOWN = -1
 FREE = 0
 OBSTACLE = 1
 FORBIDDEN_GREEN = 2
-
 OBSTACLE_INFLATION_M = ROBOT_RADIUS_M + SAFETY_MARGIN_M
 
-# Planning
+# Planning settings. Kept for later mapping/yellow modes.
 WAYPOINT_TOLERANCE_M = 0.24
 GOAL_TOLERANCE_M = 0.35
 REPLAN_INTERVAL_S = 0.7
@@ -70,7 +65,7 @@ FRONTIER_BEARING_WEIGHT = 40.0
 FRONTIER_MAX_RETRIES = 8
 MAX_VISITED_WAYPOINTS = 40
 
-# DWA local planner
+# DWA settings. Kept for later mapping/yellow modes.
 DWA_DT = 0.10
 DWA_PREDICTION_TIME = 1.0
 DWA_LINEAR_SAMPLES = 6
@@ -80,10 +75,10 @@ DWA_CLEARANCE_WEIGHT = 0.7
 DWA_SPEED_WEIGHT = 0.8
 DWA_PATH_WEIGHT = 0.7
 
-# Vision thresholds in HSV. Tune using Webots camera images.
-# OpenCV hue is 0..179, saturation/value are 0..255.
-BLUE_HSV_LOW = (95, 70, 50)
-BLUE_HSV_HIGH = (130, 255, 255)
+# HSV thresholds. Your calibration screenshot for blue showed saturated H roughly
+# 107..119, S roughly 81..177, V roughly 66..176. These values keep a safe margin.
+BLUE_HSV_LOW = (100, 55, 45)
+BLUE_HSV_HIGH = (125, 255, 255)
 
 YELLOW_HSV_LOW = (15, 70, 50)
 YELLOW_HSV_HIGH = (40, 255, 255)
@@ -91,17 +86,18 @@ YELLOW_HSV_HIGH = (40, 255, 255)
 GREEN_HSV_LOW = (45, 70, 50)
 GREEN_HSV_HIGH = (85, 255, 255)
 
-MIN_COLOR_AREA = 120
-TARGET_REACHED_AREA = 3800
+MIN_COLOR_AREA = 100
+# Stop when the blue blob is large enough. Increase if it stops too early;
+# decrease if it touches the pillar before stopping.
+TARGET_REACHED_AREA = 8500
 
 # Debugging
-PRINT_EVERY_N_STEPS = 20
+PRINT_EVERY_N_STEPS = 10
 DEBUG_SHOW_GREEN_MARKS = False
-DEBUG_PLANNING = True
-DEBUG_VISUAL_SERVO = False
+DEBUG_PLANNING = False
+DEBUG_VISUAL_SERVO = True
 DEBUG_MOTOR_COMMANDS = True
 
-# Always-on lightweight watchdogs.
 PHYSICS_JUMP_MULTIPLIER = 4.0
 STUCK_POSITION_EPSILON_M = 0.05
 STUCK_TIME_THRESHOLD_S = 4.0
