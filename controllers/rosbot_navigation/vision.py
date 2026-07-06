@@ -78,7 +78,11 @@ def detect_green(bgr: np.ndarray) -> ColorDetection:
 
 
 def target_reached(det: ColorDetection) -> bool:
-    return det.visible and det.area >= config.TARGET_REACHED_AREA
+    return (
+        det.visible
+        and det.area >= config.TARGET_REACHED_AREA
+        and abs(det.horizontal_error) <= config.TARGET_REACHED_MAX_ERROR
+    )
 
 
 def print_camera_hsv_stats(bgr: np.ndarray, brightness_thresh: int = 40):

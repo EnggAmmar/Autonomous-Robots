@@ -45,11 +45,13 @@ def visual_servo_omega(horizontal_error: float) -> float:
 
 
 def visual_approach_speed(horizontal_error: float, area: int) -> float:
+    if abs(horizontal_error) > config.VISUAL_APPROACH_ALIGN_ERROR:
+        return 0.0
+
+    v = config.VISUAL_APPROACH_FAST_MPS
     if area > 0.75 * config.TARGET_REACHED_AREA:
-        return min(config.VISUAL_APPROACH_SLOW_MPS, 0.12)
-    if abs(horizontal_error) < config.VISUAL_APPROACH_ALIGN_ERROR:
-        return config.VISUAL_APPROACH_FAST_MPS
-    return config.VISUAL_APPROACH_SLOW_MPS
+        v = min(v, 0.12)
+    return v
 
 
 def run_blue_only(robot: Robot, iface: RobotInterface, logger: EventLogger):
@@ -71,15 +73,9 @@ def run_blue_only(robot: Robot, iface: RobotInterface, logger: EventLogger):
         blue = detect_blue(bgr)
         green = detect_green(bgr)
 
-        if step_count % config.PRINT_EVERY_N_STEPS == 0:
-            logger.info(
-                sim_time,
-                f"blue={blue.visible} area={blue.area} error={blue.horizontal_error:.3f} "
-                f"green={green.visible}",
-            )
-
         if blue_goal_reached(blue):
             logger.blue_reached(sim_time)
+            logger.info(sim_time, f"TIMING SUMMARY Start -> Blue: {sim_time:.2f} s")
             logger.info(sim_time, "BLUE_ONLY complete. Stopping robot.")
             state = DONE
             iface.stop()
@@ -95,16 +91,23 @@ def run_blue_only(robot: Robot, iface: RobotInterface, logger: EventLogger):
                 state = GO_TO_BLUE
             omega = visual_servo_omega(blue.horizontal_error)
             v = visual_approach_speed(blue.horizontal_error, blue.area)
-            if config.DEBUG_VISUAL_SERVO:
+            if config.DEBUG_VISUAL_SERVO and step_count % config.PRINT_EVERY_N_STEPS == 0:
                 logger.info(
                     sim_time,
-                    f"[BLUE_ONLY] error={blue.horizontal_error:.3f} area={blue.area} v={v:.3f} omega={omega:.3f}",
+                    f"[BLUE_ONLY] blue=True area={blue.area} error={blue.horizontal_error:.3f} "
+                    f"v={v:.3f} omega={omega:.3f} green={green.visible}",
                 )
             iface.set_velocity(v, omega)
         else:
             if state != SEARCH_BLUE:
                 logger.info(sim_time, "Blue lost. Scanning in place.")
                 state = SEARCH_BLUE
+            if config.DEBUG_VISUAL_SERVO and step_count % config.PRINT_EVERY_N_STEPS == 0:
+                logger.info(
+                    sim_time,
+                    f"[BLUE_ONLY] blue=False area={blue.area} error={blue.horizontal_error:.3f} "
+                    f"v=0.000 omega={config.SEARCH_ROTATION_SPEED:.3f} green={green.visible}",
+                )
             iface.set_velocity(0.0, config.SEARCH_ROTATION_SPEED)
 
 
