@@ -15,7 +15,6 @@ from vision import (
     detect_green,
     detect_yellow,
     print_camera_hsv_stats,
-    target_reached,
     webots_camera_to_bgr,
 )
 
@@ -30,14 +29,15 @@ def clamp(value: float, low: float, high: float) -> float:
     return max(low, min(high, value))
 
 
-def visual_servo_omega(horizontal_error: float) -> float:
-    """Turn toward the target detected by the camera.
+def blue_goal_reached(blue) -> bool:
+    return (
+        blue.visible
+        and blue.area >= config.TARGET_REACHED_AREA
+        and abs(blue.horizontal_error) <= config.TARGET_REACHED_MAX_ERROR
+    )
 
-    horizontal_error is negative when the blob is left of image centre and
-    positive when it is right of image centre. The sign below is the normal camera
-    centering law for this training robot. If the robot turns away from blue,
-    change MOTOR_TURN_SIGN in config.py, not this function first.
-    """
+
+def visual_servo_omega(horizontal_error: float) -> float:
     if abs(horizontal_error) < config.VISUAL_SERVO_DEADBAND:
         return 0.0
     omega = -horizontal_error * config.MAX_ANGULAR_SPEED * config.VISUAL_SERVO_ANGULAR_GAIN
@@ -45,7 +45,6 @@ def visual_servo_omega(horizontal_error: float) -> float:
 
 
 def visual_approach_speed(horizontal_error: float, area: int) -> float:
-    """Fast straight approach, slower while badly misaligned or very close."""
     if area > 0.75 * config.TARGET_REACHED_AREA:
         return min(config.VISUAL_APPROACH_SLOW_MPS, 0.12)
     if abs(horizontal_error) < config.VISUAL_APPROACH_ALIGN_ERROR:
@@ -54,7 +53,6 @@ def visual_approach_speed(horizontal_error: float, area: int) -> float:
 
 
 def run_blue_only(robot: Robot, iface: RobotInterface, logger: EventLogger):
-    """Fastest simple controller for the current goal: only reach blue."""
     state = SEARCH_BLUE
     step_count = 0
 
@@ -80,7 +78,7 @@ def run_blue_only(robot: Robot, iface: RobotInterface, logger: EventLogger):
                 f"green={green.visible}",
             )
 
-        if blue.visible and target_reached(blue):
+        if blue_goal_reached(blue):
             logger.blue_reached(sim_time)
             logger.info(sim_time, "BLUE_ONLY complete. Stopping robot.")
             state = DONE
@@ -111,11 +109,6 @@ def run_blue_only(robot: Robot, iface: RobotInterface, logger: EventLogger):
 
 
 def run_blue_then_yellow_placeholder(robot: Robot, iface: RobotInterface, logger: EventLogger):
-    """Temporary safe fallback.
-
-    The current tuning target is blue-only. After blue is reliable, restore the
-    mapping/frontier/DWA version for yellow navigation.
-    """
     logger.info(robot.getTime(), "TARGET_MODE is BLUE_THEN_YELLOW, but this tuned file currently runs BLUE_ONLY logic first.")
     run_blue_only(robot, iface, logger)
 
