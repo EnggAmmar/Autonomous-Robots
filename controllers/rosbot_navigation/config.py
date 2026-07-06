@@ -18,11 +18,10 @@ TRACK_WIDTH_M = 0.32
 ROBOT_RADIUS_M = 0.23
 SAFETY_MARGIN_M = 0.06
 
-# Motor polarity. In the SimpleRosBot training PROTO the camera/front points along
-# robot -Z while the wheel hinge axes are +X. A positive wheel speed therefore
-# drives opposite to the controller's forward-heading convention. Keep the turn
-# sign separate so MOTOR_TEST can diagnose direction without editing algorithms.
-MOTOR_FORWARD_SIGN = -1.0
+# Motor polarity. Your MOTOR_TEST showed that +1.0 is the correct forward sign
+# for this training world. Keep this positive unless MOTOR_TEST starts moving
+# backward after a PROTO/world change.
+MOTOR_FORWARD_SIGN = 1.0
 MOTOR_TURN_SIGN = 1.0
 
 # Speed limits. These are still conservative, but high enough that the robot does
@@ -32,26 +31,19 @@ MAX_ANGULAR_SPEED = 1.80      # rad/s
 MAX_WHEEL_SPEED = 16.0        # rad/s, used as safety clamp
 
 # Search/visual approach speeds.
-SEARCH_ROTATION_SPEED = 0.70
-NO_PATH_ROTATION_SPEED = 0.70
-VISUAL_APPROACH_FAST_MPS = 0.22
-VISUAL_APPROACH_SLOW_MPS = 0.08
-VISUAL_APPROACH_ALIGN_ERROR = 0.45
+SEARCH_ROTATION_SPEED = 0.55
+NO_PATH_ROTATION_SPEED = 0.55
+VISUAL_APPROACH_FAST_MPS = 0.32
+VISUAL_APPROACH_SLOW_MPS = 0.12
+VISUAL_APPROACH_ALIGN_ERROR = 0.50
 
 # GO_TO_BLUE/GO_TO_YELLOW visual-servo proportional controller (rosbot_navigation.py).
 # MAX_ANGULAR_SPEED above stays a hard clamp; this is the working gain applied to
 # horizontal_error before that clamp. Use CAMERA_CALIBRATION if detection is wrong.
-VISUAL_SERVO_ANGULAR_GAIN = 0.75
+VISUAL_SERVO_ANGULAR_GAIN = 0.65
 VISUAL_SERVO_DEADBAND = 0.04
 
-# Lidar self-detection zone (mapping.py's raycast_update). Confirmed empirically
-# by placing the robot at two unrelated world positions with the same heading and
-# comparing raw lidar ranges: from about +7-8 degrees off dead-ahead through the
-# full +90 degree edge of the 180-degree FOV, the reported ranges were IDENTICAL
-# (down to mm) at both positions -- proof this side of the FOV is always looking
-# at the robot's own body/wheel, not the environment, regardless of where the
-# robot actually is. protos/ can't be modified, so these rays are excluded from
-# every scan instead of being trusted as real obstacles.
+# Lidar self-detection zone (mapping.py's raycast_update).
 LIDAR_SELF_OCCLUSION_ANGLE_MIN_RAD = 0.1047  # ~6 degrees off dead-ahead
 LIDAR_SELF_OCCLUSION_ANGLE_MAX_RAD = 1.658   # ~95 degrees off dead-ahead
 
