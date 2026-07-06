@@ -20,6 +20,7 @@ class RobotInterface:
         self.compass = None
         self.lidar = None
         self.distance_sensors = []
+        self._last_motor_debug_time = -999.0
         self._detect_devices()
 
     def print_devices(self):
@@ -140,8 +141,15 @@ class RobotInterface:
         linear_v = max(-config.MAX_LINEAR_SPEED, min(config.MAX_LINEAR_SPEED, linear_v))
         angular_v = max(-config.MAX_ANGULAR_SPEED, min(config.MAX_ANGULAR_SPEED, angular_v))
 
-        left_speed = (linear_v - angular_v * config.TRACK_WIDTH_M / 2.0) / config.WHEEL_RADIUS_M
-        right_speed = (linear_v + angular_v * config.TRACK_WIDTH_M / 2.0) / config.WHEEL_RADIUS_M
+        # Split the command into forward and turn terms so the wheel polarity can
+        # be corrected without changing navigation logic. This fixes the training
+        # PROTO symptom where a forward command made the robot creep/rotate instead
+        # of moving toward the camera-facing direction.
+        forward_term = config.MOTOR_FORWARD_SIGN * linear_v / config.WHEEL_RADIUS_M
+        turn_term = config.MOTOR_TURN_SIGN * angular_v * config.TRACK_WIDTH_M / (2.0 * config.WHEEL_RADIUS_M)
+        left_speed = forward_term - turn_term
+        right_speed = forward_term + turn_term
+
         left_speed = max(-config.MAX_WHEEL_SPEED, min(config.MAX_WHEEL_SPEED, left_speed))
         right_speed = max(-config.MAX_WHEEL_SPEED, min(config.MAX_WHEEL_SPEED, right_speed))
 
@@ -149,6 +157,19 @@ class RobotInterface:
             motor.setVelocity(left_speed)
         for motor in self.motors_right:
             motor.setVelocity(right_speed)
+
+        if getattr(config, "DEBUG_MOTOR_COMMANDS", False):
+            try:
+                now = self.robot.getTime()
+            except Exception:
+                now = 0.0
+            if now - self._last_motor_debug_time > 1.0:
+                print(
+                    f"[{now:7.2f}s] motor cmd v={linear_v:.3f} omega={angular_v:.3f} "
+                    f"left={left_speed:.2f} right={right_speed:.2f} "
+                    f"forward_sign={config.MOTOR_FORWARD_SIGN} turn_sign={config.MOTOR_TURN_SIGN}"
+                )
+                self._last_motor_debug_time = now
 
     def stop(self):
         self.set_velocity(0.0, 0.0)
